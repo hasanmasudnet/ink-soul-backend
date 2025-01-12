@@ -6,10 +6,15 @@ async function SuperAdminAuthGuard(req: Request, res: Response, next: NextFuncti
     let token = req.headers.authorization?.split(" ")[1]
     
     let decode: any = await JWT.verify(`${token}`, `${process.env.JWT_ADMIN_SECRET}`)
-    req.auth_id = decode.data?.id
-    req.auth_role = decode.data?.role
+    
+    if(decode.data?.role==="SUPER_ADMIN"){
+      req.auth_id = decode.data?.id
+      req.auth_role = decode.data?.role
 
-    next()
+      next()
+    }else{
+      res.status(401).json({message:"Unauthorize"})
+    }
   }catch(err){
     res.status(401).json({message:"Unauthorize"})
   }

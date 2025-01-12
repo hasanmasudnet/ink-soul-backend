@@ -10,13 +10,14 @@ import {
   validateDesigner,
   validateDesignerIdParam
 } from "../validators/designer.validator"
+import { AdminAuthGuard } from "../middlewares/admin.guard"
 
 const router = express.Router()
 
-router.post("/", validateDesigner, createDesigner)
-router.get("/", getDesigners)
-router.get("/:id", validateDesignerIdParam, getDesignerById)
-router.put("/:id", validateDesignerIdParam, validateDesigner, updateDesigner)
-router.delete("/:id", validateDesignerIdParam, deleteDesigner)
+router.post("/", AdminAuthGuard, validateDesigner, createDesigner)
+router.get("/", AdminAuthGuard, getDesigners)
+router.get("/:id", AdminAuthGuard, validateDesignerIdParam, getDesignerById)
+router.put("/:id", AdminAuthGuard, validateDesignerIdParam, validateDesigner, updateDesigner)
+router.delete("/:id", AdminAuthGuard, validateDesignerIdParam, deleteDesigner)
 
 export { router }

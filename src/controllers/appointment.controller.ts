@@ -5,8 +5,6 @@ import { CombineDateWithTime } from '../lib/func'
 
 const prisma = new PrismaClient()
 
-// ===================
-
 export const getCustomers = async (req: Request, res: Response)=>{
   try{
     let customers = await prisma.customer.findMany({
@@ -107,7 +105,6 @@ export const createAppointment = async (req: Request, res: Response) => {
       res.status(201).json(appointment)
     }
   } catch (error) {
-    console.log(error)
     res.status(500).json({ message: "Internal server error" })
   }
 }
@@ -184,7 +181,6 @@ export const getAppointments = async (req: Request, res: Response) => {
       }
     })
   } catch (error) {
-    console.error(error)
     res.status(500).json({ message: "Internal server error" })
   }
 }

@@ -45,7 +45,6 @@ async function getArtists(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error: any) {
-    console.error('Error fetching artists:', error);
     res.status(500).json({ 
       message: "Internal server error",
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -66,7 +65,6 @@ async function getArtistById(req: Request, res: Response): Promise<void> {
     }
     res.json(artist);
   } catch (error: any) {
-    console.error('Error fetching artist:', error);
     res.status(500).json({ 
       message: "Internal server error",
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -76,7 +74,6 @@ async function getArtistById(req: Request, res: Response): Promise<void> {
 
 // Create a new artist
 async function createArtist(req: Request, res: Response): Promise<void> {
-  console.log('Received artist data:', req.body);
   
   const { name, email, phone, specialties, status, joinDate } = req.body;
   try {
@@ -113,15 +110,12 @@ async function createArtist(req: Request, res: Response): Promise<void> {
       artistData.joinDate = joinDate;
     }
 
-    console.log('Creating artist with data:', artistData);
-
     const newArtist = await prisma.artist.create({
       data: artistData
     });
 
     res.status(201).json(newArtist);
   } catch (error: any) {
-    console.error('Error creating artist:', error);
     res.status(500).json({ 
       message: "Internal server error",
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -156,7 +150,6 @@ async function updateArtist(req: Request, res: Response): Promise<void> {
     });
     res.json(updatedArtist);
   } catch (error: any) {
-    console.error('Error updating artist:', error);
     res.status(500).json({ 
       message: "Internal server error",
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -173,7 +166,6 @@ async function deleteArtist(req: Request, res: Response): Promise<void> {
     });
     res.status(204).send();
   } catch (error: any) {
-    console.error('Error deleting artist:', error);
     res.status(500).json({ 
       message: "Internal server error",
       error: error instanceof Error ? error.message : 'Unknown error occurred'

@@ -61,7 +61,6 @@ export async function Dashboard(req: Request, res: Response) {
       monthly_revenue: totalRevenueLastMonth,
     })
   } catch (err) {
-    console.error(err)
     res.status(500).json({ message: "Internal server error" })
   }
 }
@@ -238,7 +237,6 @@ export async function PaymentReports(req: Request, res: Response) {
       total_revenue_month: totalRevenueMonth || 0
     })
   } catch (err) {
-    console.error(err)
     res.status(500).json({ message: "Internal server error" })
   }
 }

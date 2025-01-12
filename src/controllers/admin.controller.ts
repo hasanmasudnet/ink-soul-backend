@@ -160,7 +160,6 @@ async function UpdateAdminPassword(req: Request, res: Response){
       res.status(400).json({message:"Old password was incorrect"})
     }
   }catch(err){
-    console.log(err)
     res.status(500).json({message:"Internal server error"})
   }
 }
