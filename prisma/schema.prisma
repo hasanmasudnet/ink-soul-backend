@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Appointment {
+  id                String   @id @default(cuid()) @map("id")
+  customerId        String?  @map("customer_id")
+  tattooArtistId    String?  @map("tattoo_artist_id")
+  tattooDesignerId  String?  @map("tattoo_designer_id")
+  referralSourceId  String?  @map("referral_source_id")
+  date              DateTime?
+  time              DateTime?
+  totalPrice        Float    @map("total_price")
+  deposit           Float    @default(0)
+  remainingBalance  Float    @default(0) @map("remaining_balance")
+  status            String   @default("pending")
+  paymentType       String?  @map("payment_type")
+  photoId           String?  @map("photo_id") 
+  tattooDesign      String?  @map("tattoo_design") 
+  creditCardAuth    String?  @map("credit_card_auth")
+  tattooConsent     String?  @map("tattoo_consent")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  customer          Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  tattooArtist      Artist?   @relation(fields: [tattooArtistId], references: [id], onDelete: SetNull)
+  tattooDesigner    Designer? @relation(fields: [tattooDesignerId], references: [id], onDelete: SetNull)
+  referralSource    ReferralSource? @relation(fields: [referralSourceId], references: [id], onDelete: SetNull)
+  
+  payments          Payment[] @relation("AppointmentPayments")
+  documents         Document[]
+
+  @@map("appointments")
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  status    String?  @default("active")
+  imageUrl  String?  @map("image_url")
+  customer_type      String?  @default("appointment")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  appointments Appointment[]
+
+  @@map("customers")
+}
+
+model Artist {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  specialties String[]
+  status      String   @default("active")
+  imageUrl    String?  @map("image_url")
+  joinDate    DateTime @default(now()) @map("join_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  appointments Appointment[]
+
+  @@map("artists")
+}
+
+model Designer {
+  id           String   @id @default(cuid())
+  name         String
+  email        String?
+  phone        String?
+  specialties  String[]
+  status       String   @default("active")
+  imageUrl     String?  @map("image_url")
+  totalDesigns Int      @default(0) @map("total_designs")
+  joinDate     DateTime @default(now()) @map("join_date")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  appointments Appointment[]
+
+  @@map("designers")
+}
+
+model ReferralSource {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  appointments Appointment[]
+
+  @@map("referral_sources")
+}
+
+model Payment {
+  id            String   @id @default(cuid()) @map("id")
+  appointmentId String   @map("appointment_id")
+  amount        Float
+  paymentMethod String   @map("payment_method")
+  status        String?  @default("completed")
+  notes         String?  @map("notes")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  appointment   Appointment @relation("AppointmentPayments", fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+enum DocumentType {
+  PHOTO_ID
+  TATTOO_DESIGN
+  CREDIT_CARD_AUTH
+  TATTOO_CONSENT
+}
+
+model Document {
+  id            String       @id @default(cuid())
+  appointmentId String       @map("appointment_id")
+  type          DocumentType
+  fileName      String       @map("file_name")
+  originalName  String       @map("original_name")
+  mimeType      String       @map("mime_type")
+  fileUrl       String       @map("file_url")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  appointment   Appointment  @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMINISTRATOR
+  MANAGER
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String   @default("default-avatar.png")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  role      Role     @default(ADMINISTRATOR) @map("role")
+  phone     String?
+  address   String?
+
+  @@map("admins")
+}

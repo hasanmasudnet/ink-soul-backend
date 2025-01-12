@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "appointments" ALTER COLUMN "date" DROP NOT NULL,
+ALTER COLUMN "time" DROP NOT NULL;
