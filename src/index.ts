@@ -43,9 +43,8 @@ app.use("/appointments", appointment_routers)
 app.use("/payments", payment_routers)
 app.use("/widgets", widget_routers)
 
-app.post('/test',(req, res)=>{
-  console.log(req.body)
-  res.json({"message":"hikdkdk -------"})
+app.get('/',(req, res)=>{
+  res.json({"message":"Server is running 😊"})
 })
 
 app.listen(PORT, () => {
