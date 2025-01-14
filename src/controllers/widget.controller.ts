@@ -18,7 +18,7 @@ export async function Dashboard(req: Request, res: Response) {
 
     const todayAppointments = await prisma.appointment.findMany({
       where: {
-        createdAt: {
+        date: {
           gte: startOfToday,
           lte: endOfToday,
         },
@@ -27,7 +27,7 @@ export async function Dashboard(req: Request, res: Response) {
 
     const lastWeekAppointments = await prisma.appointment.findMany({
       where: {
-        createdAt: {
+        date: {
           gte: startOfLastWeek,
           lte: endOfToday,
         },
@@ -36,7 +36,7 @@ export async function Dashboard(req: Request, res: Response) {
 
     const lastMonthAppointments = await prisma.appointment.findMany({
       where: {
-        createdAt: {
+        date: {
           gte: startOfLastMonth,
           lte: endOfToday,
         },
@@ -79,7 +79,7 @@ export async function Reports(req: Request, res: Response) {
     const endOfLastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0, 23, 59, 59)
 
     const whereConditions: any = {
-      createdAt: {
+      date: {
         gte: startOfCurrentMonth,
         lte: endOfCurrentMonth,
       },
@@ -103,7 +103,7 @@ export async function Reports(req: Request, res: Response) {
 
     const lastMonthAppointments = await prisma.appointment.findMany({
       where: {
-        createdAt: {
+        date: {
           gte: startOfLastMonth,
           lte: endOfLastMonth,
         },
@@ -190,7 +190,7 @@ export async function PaymentReports(req: Request, res: Response) {
     // Total Revenue Calculation
     const totalRevenueTodayAppointments = await prisma.appointment.findMany({
       where: {
-        createdAt: {
+        date: {
           gte: startOfToday,
           lte: endOfToday
         },
@@ -200,7 +200,7 @@ export async function PaymentReports(req: Request, res: Response) {
 
     const totalRevenueWeekAppointments = await prisma.appointment.findMany({
       where: {
-        createdAt: {
+        date: {
           gte: startOfWeek,
           lte: endOfWeek
         },
@@ -210,7 +210,7 @@ export async function PaymentReports(req: Request, res: Response) {
 
     const totalRevenueMonthAppointments = await prisma.appointment.findMany({
       where: {
-        createdAt: {
+        date: {
           gte: startOfMonth,
           lte: endOfMonth
         },

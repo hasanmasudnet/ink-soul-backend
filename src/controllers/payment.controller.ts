@@ -144,10 +144,18 @@ export const getPayments = async (req: Request, res: Response) => {
       where: searchFilter
     })
 
+    const totalAmount = await prisma.payment.aggregate({
+      _sum: {
+        amount: true
+      },
+      where: searchFilter
+    })
+
     const totalPages = Math.ceil(totalCount / pageLimit)
 
     res.status(200).json({
       data: payments,
+      total_amount: totalAmount._sum.amount || 0,
       pagination: {
         currentPage: pageNumber,
         totalPages,
