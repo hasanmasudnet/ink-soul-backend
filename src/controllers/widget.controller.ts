@@ -11,10 +11,10 @@ export async function Dashboard(req: Request, res: Response) {
     const endOfToday = new Date(currentDate.setHours(23, 59, 59, 999))
 
     const startOfLastWeek = new Date(currentDate)
-    startOfLastWeek.setDate(currentDate.getDate() - 6)
+    startOfLastWeek.setDate(currentDate.getDate() - 7)
 
     const startOfLastMonth = new Date(currentDate)
-    startOfLastMonth.setDate(currentDate.getDate() - 29)
+    startOfLastMonth.setDate(currentDate.getDate() - 30)
 
     const todayAppointments = await prisma.appointment.findMany({
       where: {
