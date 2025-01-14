@@ -13,7 +13,7 @@ const router = express.Router()
 
 router.get("/", AdminAuthGuard, getCustomers)
 router.get("/:id", AdminAuthGuard, validateCustomerIdParam, getCustomerById)
-router.post("/", AdminAuthGuard, validateCustomer, createCustomer)
+router.post("/", validateCustomer, createCustomer)
 router.put("/:id", AdminAuthGuard, validateCustomerIdParam, validateCustomer, updateCustomer)
 router.delete("/:id", AdminAuthGuard, validateCustomerIdParam, deleteCustomer)
 

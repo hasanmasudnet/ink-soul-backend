@@ -84,7 +84,7 @@ export const createAppointment = async (req: Request, res: Response) => {
         totalPrice: total_price,
         deposit: total_deposit,
         remainingBalance: total_price - total_deposit,
-        status: (total_price - total_deposit) === 0?"completed":"pending",
+        status: total_price!==0 && (total_price - total_deposit) === 0?"completed":"pending",
         paymentType: payment_data.length > 0? payment_data[0]?.paymentMethod:"",
         photoId: uploaded_files?.photoId,
         tattooDesign: uploaded_files?.tattooDesign,

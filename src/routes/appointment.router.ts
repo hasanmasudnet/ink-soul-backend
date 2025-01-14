@@ -20,7 +20,7 @@ router.get('/artists', AdminAuthGuard, getArtists)
 router.get('/designers', AdminAuthGuard, getDesigners)
 router.get('/referrals', AdminAuthGuard, getReferrals)
 
-router.post('/', AdminAuthGuard, validateAppointment, createAppointment)
+router.post('/', validateAppointment, createAppointment)
 router.get('/', AdminAuthGuard, getAppointments)
 router.get('/:id', AdminAuthGuard, validateAppointmentIdParam, getAppointment)
 router.put('/:id', AdminAuthGuard, validateAppointment, validateAppointmentIdParam, updateAppointment)
