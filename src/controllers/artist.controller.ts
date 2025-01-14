@@ -1,13 +1,13 @@
 import { Request, Response } from "express"
 import { PrismaClient } from "@prisma/client"
-import { HandleDeleteFiles, HandleFileUploads } from "../lib/file-upload";
+import { HandleFileUploads } from "../lib/file-upload";
 
 const prisma = new PrismaClient()
 
 // Get all artists
-async function getArtists(req: Request, res: Response): Promise<void> {
+async function getArtists(req: Request, res: Response) {
   try {
-    const { page = 1, pageSize = 6, search = "" } = req.query;
+    const { page = 1, pageSize = 6, search = "", status = "" } = req.query;
     const skip = (Number(page) - 1) * Number(pageSize);
     const take = Number(pageSize);
 
@@ -22,8 +22,15 @@ async function getArtists(req: Request, res: Response): Promise<void> {
         }
       : {};
 
+    const statusCondition = status
+      ? { status: { equals: status } }
+      : {};
+
     const artists = await prisma.artist.findMany({
-      where: searchCondition,
+      where: {
+        ...searchCondition,
+        ...statusCondition,
+      },
       skip,
       take,
       orderBy: {
@@ -32,7 +39,10 @@ async function getArtists(req: Request, res: Response): Promise<void> {
     });
 
     const totalArtists = await prisma.artist.count({
-      where: searchCondition,
+      where: {
+        ...searchCondition,
+        ...statusCondition,
+      },
     });
 
     res.json({
@@ -46,14 +56,13 @@ async function getArtists(req: Request, res: Response): Promise<void> {
     });
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Internal server error",
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      message: "Internal server error"
     });
   }
 }
 
 // Get a single artist by ID
-async function getArtistById(req: Request, res: Response): Promise<void> {
+async function getArtistById(req: Request, res: Response) {
   const { id } = req.params;
   try {
     const artist = await prisma.artist.findUnique({
@@ -66,14 +75,13 @@ async function getArtistById(req: Request, res: Response): Promise<void> {
     res.json(artist);
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Internal server error",
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      message: "Internal server error"
     });
   }
 }
 
 // Create a new artist
-async function createArtist(req: Request, res: Response): Promise<void> {
+async function createArtist(req: Request, res: Response) {
   
   const { name, email, phone, specialties, status, joinDate } = req.body;
   try {
@@ -117,14 +125,13 @@ async function createArtist(req: Request, res: Response): Promise<void> {
     res.status(201).json(newArtist);
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Internal server error",
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
-    });
+      message: "Internal server error"
+    })
   }
 }
 
 // Update an existing artist
-async function updateArtist(req: Request, res: Response): Promise<void> {
+async function updateArtist(req: Request, res: Response) {
   const { id } = req.params;
   const { name, email, phone, specialties, status, joinDate } = req.body;
   try {
@@ -151,14 +158,13 @@ async function updateArtist(req: Request, res: Response): Promise<void> {
     res.json(updatedArtist);
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Internal server error",
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
-    });
+      message: "Internal server error"
+    })
   }
 }
 
 // Delete an artist
-async function deleteArtist(req: Request, res: Response): Promise<void> {
+async function deleteArtist(req: Request, res: Response) {
   const { id } = req.params;
   try {
     await prisma.artist.delete({
@@ -167,9 +173,8 @@ async function deleteArtist(req: Request, res: Response): Promise<void> {
     res.status(204).send();
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Internal server error",
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
-    });
+      message: "Internal server error"
+    })
   }
 }
 

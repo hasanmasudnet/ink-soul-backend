@@ -62,7 +62,7 @@ export const getReferrals = async (req: Request, res: Response)=>{
 // Create a new appointment
 export const createAppointment = async (req: Request, res: Response) => {
   try {
-    const { customerId, customerType, tattooArtistId, tattooDesignerId, referralSourceId, date, time, totalPrice, payments, status } = req.body
+    const { customerId, customerType, tattooArtistId, tattooDesignerId, referralSourceId, date, time, totalPrice, payments } = req.body
     let payment_data = JSON.parse(payments)
     let total_price = parseFloat(totalPrice)
     let total_deposit = payment_data.reduce((sum: number, item: {amount: number}) => sum + item.amount, 0)
@@ -111,30 +111,42 @@ export const createAppointment = async (req: Request, res: Response) => {
 
 // Get all appointments
 export const getAppointments = async (req: Request, res: Response) => {
-  const { search, customerId, tattooArtistId, tattooDesignerId, referralSourceId, status, startDate, endDate, page = 1, pageSize = 10 } = req.query
-  
+  const { 
+    search, 
+    customerId, 
+    tattooArtistId, 
+    tattooDesignerId, 
+    referralSourceId, 
+    status, 
+    startDate, 
+    endDate, 
+    page = 1, 
+    pageSize = 10, 
+    customerType 
+  } = req.query;
+
   try {
-    const skip = (Number(page) - 1) * Number(pageSize)
-    const take = Number(pageSize)
+    const skip = (Number(page) - 1) * Number(pageSize);
+    const take = Number(pageSize);
 
-    const searchFilters: any = {}
+    const searchFilters: any = {};
 
-    let startDateParsed = startDate ? new Date(String(startDate)) : null
-    let endDateParsed = endDate ? new Date(String(endDate)) : null
+    let startDateParsed = startDate ? new Date(String(startDate)) : null;
+    let endDateParsed = endDate ? new Date(String(endDate)) : null;
 
     if (startDateParsed && endDateParsed) {
       searchFilters.date = {
         gte: startDateParsed,
         lte: endDateParsed,
-      }
+      };
     } else if (startDateParsed) {
       searchFilters.date = {
         gte: startDateParsed,
-      }
+      };
     } else if (endDateParsed) {
       searchFilters.date = {
         lte: endDateParsed,
-      }
+      };
     }
 
     if (search) {
@@ -143,14 +155,16 @@ export const getAppointments = async (req: Request, res: Response) => {
         { tattooArtist: { name: { contains: String(search), mode: 'insensitive' } } },
         { tattooDesigner: { name: { contains: String(search), mode: 'insensitive' } } },
         { referralSource: { name: { contains: String(search), mode: 'insensitive' } } }
-      ]
+      ];
     }
 
-    if (customerId) searchFilters.customerId = String(customerId)
-    if (tattooArtistId) searchFilters.tattooArtistId = String(tattooArtistId)
-    if (tattooDesignerId) searchFilters.tattooDesignerId = String(tattooDesignerId)
-    if (referralSourceId) searchFilters.referralSourceId = String(referralSourceId)
-    if (status) searchFilters.status = String(status)
+    if (customerId) searchFilters.customerId = String(customerId);
+    if (tattooArtistId) searchFilters.tattooArtistId = String(tattooArtistId);
+    if (tattooDesignerId) searchFilters.tattooDesignerId = String(tattooDesignerId);
+    if (referralSourceId) searchFilters.referralSourceId = String(referralSourceId);
+    if (status) searchFilters.status = String(status);
+
+    if (customerType) searchFilters.customer = { customer_type: { equals: String(customerType) } };
 
     const appointments = await prisma.appointment.findMany({
       where: Object.keys(searchFilters).length ? searchFilters : undefined,
@@ -165,11 +179,11 @@ export const getAppointments = async (req: Request, res: Response) => {
       },
       skip,
       take,
-    })
+    });
 
     const totalAppointments = await prisma.appointment.count({
       where: Object.keys(searchFilters).length ? searchFilters : undefined
-    })
+    });
 
     res.status(200).json({
       appointments,
@@ -179,9 +193,9 @@ export const getAppointments = async (req: Request, res: Response) => {
         currentPage: Number(page),
         pageSize: Number(pageSize)
       }
-    })
+    });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" })
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 
