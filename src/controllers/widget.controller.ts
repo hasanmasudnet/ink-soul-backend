@@ -72,46 +72,71 @@ export async function Reports(req: Request, res: Response) {
 
     const currentDate = new Date()
 
-    const startOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-    const endOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
+    const startOfToday = new Date(currentDate.setHours(0, 0, 0, 0))
+    const endOfToday = new Date(currentDate.setHours(23, 59, 59, 999))
 
-    const startOfLastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
-    const endOfLastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0, 23, 59, 59)
+    const startOfLastWeek = new Date(currentDate)
+    startOfLastWeek.setDate(currentDate.getDate() - 7)
 
-    const whereConditions: any = {
+    const startOfLastMonth = new Date(currentDate)
+    startOfLastMonth.setDate(currentDate.getDate() - 30)
+
+    const whereConditionsToday: any = {
       date: {
-        gte: startOfCurrentMonth,
-        lte: endOfCurrentMonth,
+        gte: startOfToday,
+        lte: endOfToday,
+      },
+    }
+
+    const whereConditionsLastWeek: any = {
+      date: {
+        gte: startOfLastWeek,
+        lte: endOfToday,
+      },
+    }
+
+    const whereConditionsLastMonth: any = {
+      date: {
+        gte: startOfLastMonth,
+        lte: endOfToday,
       },
     }
 
     if (tattooArtistId) {
-      whereConditions.tattooArtistId = tattooArtistId
+      whereConditionsToday.tattooArtistId = tattooArtistId
+      whereConditionsLastWeek.tattooArtistId = tattooArtistId
+      whereConditionsLastMonth.tattooArtistId = tattooArtistId
     }
 
     if (tattooDesignerId) {
-      whereConditions.tattooDesignerId = tattooDesignerId
+      whereConditionsToday.tattooDesignerId = tattooDesignerId
+      whereConditionsLastWeek.tattooDesignerId = tattooDesignerId
+      whereConditionsLastMonth.tattooDesignerId = tattooDesignerId
     }
 
     if (referralSourceId) {
-      whereConditions.referralSourceId = referralSourceId
+      whereConditionsToday.referralSourceId = referralSourceId
+      whereConditionsLastWeek.referralSourceId = referralSourceId
+      whereConditionsLastMonth.referralSourceId = referralSourceId
     }
 
-    const currentMonthAppointments = await prisma.appointment.findMany({
-      where: whereConditions,
+    const todayAppointments = await prisma.appointment.findMany({
+      where: whereConditionsToday,
+    })
+
+    const lastWeekAppointments = await prisma.appointment.findMany({
+      where: whereConditionsLastWeek,
     })
 
     const lastMonthAppointments = await prisma.appointment.findMany({
-      where: {
-        date: {
-          gte: startOfLastMonth,
-          lte: endOfLastMonth,
-        },
-        ...whereConditions,
-      },
+      where: whereConditionsLastMonth,
     })
 
-    const totalRevenueCurrentMonth = currentMonthAppointments.reduce((sum, appointment) => {
+    const totalRevenueToday = todayAppointments.reduce((sum, appointment) => {
+      return sum + (appointment.totalPrice - appointment.remainingBalance)
+    }, 0)
+
+    const totalRevenueLastWeek = lastWeekAppointments.reduce((sum, appointment) => {
       return sum + (appointment.totalPrice - appointment.remainingBalance)
     }, 0)
 
@@ -119,35 +144,10 @@ export async function Reports(req: Request, res: Response) {
       return sum + (appointment.totalPrice - appointment.remainingBalance)
     }, 0)
 
-    let revenuePercentageChange = null
-
-    if (totalRevenueLastMonth !== 0) {
-      const revenueDifference = totalRevenueCurrentMonth - totalRevenueLastMonth
-      revenuePercentageChange = (revenueDifference / totalRevenueLastMonth) * 100
-    }
-
-    const totalAppointmentsCurrentMonth = currentMonthAppointments.length
-    const totalAppointmentsLastMonth = lastMonthAppointments.length
-
-    let appointmentPercentageChange = null
-
-    if (totalAppointmentsLastMonth !== 0) {
-      const appointmentDifference = totalAppointmentsCurrentMonth - totalAppointmentsLastMonth
-      appointmentPercentageChange = (appointmentDifference / totalAppointmentsLastMonth) * 100
-    }
-
-    const activeArtists = await prisma.artist.count({
-      where: {
-        status: "active",
-      },
-    })
-
     res.status(200).json({
-      total_revenue: totalRevenueCurrentMonth,
-      total_appointments: totalAppointmentsCurrentMonth,
-      active_artists: activeArtists,
-      revenue_percentage_change: revenuePercentageChange,
-      appointment_percentage_change: appointmentPercentageChange,
+      today_revenue: totalRevenueToday,
+      weekly_revenue: totalRevenueLastWeek,
+      monthly_revenue: totalRevenueLastMonth,
     })
   } catch (err) {
     res.status(500).json({ message: "Internal server error" })
